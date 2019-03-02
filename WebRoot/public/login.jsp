@@ -111,6 +111,42 @@
                 </c:otherwise>
             </c:choose>
 		</c:when>
+		<c:when
+			test="${(param.loginOp eq 'faceLogin') && !(empty param.takepic) && (pageContext.request.method eq 'POST')}">
+			<c:choose>
+				<c:when test="${!empty cookie.ZM_TEST}">
+					<c:choose>
+						<c:when
+							test="${(not empty param.login_csrf) && (param.login_csrf eq cookie.ZM_LOGIN_CSRF.value)}">
+							<% System.out.println("inside when"); %>
+							<zm:login authPic="${param.takepic}"
+								varRedirectUrl="postLoginUrl" varAuthResult="authResult"
+								rememberme="${param.zrememberme == '1'}"
+								trustedDeviceToken="${cookie.ZM_TRUST_TOKEN.value}" />
+							<%
+								// Delete cookie
+															Cookie csrfCookie = new Cookie("ZM_LOGIN_CSRF", "");
+															csrfCookie.setMaxAge(0);
+															response.addCookie(csrfCookie);
+
+															pageContext.setAttribute("login_csrf", "");
+							%>
+                            <% System.out.println("when finished"); %>
+						</c:when>
+						<c:otherwise>
+                            <% System.out.println("inside otherwise"); %>
+							<!-- on failure of csrf show error to user -->
+							<c:set var="errorCode" value="unknownError" />
+							<fmt:message var="errorMessage" key="unknownError" />
+						</c:otherwise>
+					</c:choose>
+				</c:when>
+				<c:otherwise>
+					<c:set var="errorCode" value="noCookies" />
+					<fmt:message var="errorMessage" key="errorCookiesDisabled" />
+				</c:otherwise>
+			</c:choose>
+		</c:when>
 		<c:when test="${(param.loginOp eq 'login') && !(empty fullUserName) && !(empty param.password) && (pageContext.request.method eq 'POST')}">
 			<c:choose>
 				<c:when test="${!empty cookie.ZM_TEST}">
@@ -592,15 +628,17 @@ if (application.getInitParameter("offlineMode") != null) {
                                 <input type="submit" class="ZLoginButton DwtButton" value="<fmt:message key="login"/>" />
                                 </td>
                                 </tr>
-			
-				<c:if test="${domainInfo.attrs.zimbraFeatureResetPasswordStatus eq 'enabled'}">	
                                     <tr>
+                                        <td class="submitTD">
+                                            <a href="#" onclick="openFaceCam();" id="ZFaceLogin" aria-controls="ZFaceLogin" aria-expanded="false"><fmt:message key="faceAuthentication"/></a>
+                                        </td>
+                                     <c:if test="${domainInfo.attrs.zimbraFeatureResetPasswordStatus eq 'enabled'}"> 
                                         <td>&nbsp;</td>
                                         <td class="submitTD">
                                             <a href="#" onclick="forgotPassword();" id="ZLoginForgotPassword" aria-controls="ZLoginForgotPassword" aria-expanded="false"><fmt:message key="forgotPassword"/></a>
                                         </td>
+                                     </c:if>
                                     </tr>
-                                </c:if>
                             </c:otherwise>
                         </c:choose>
                         <c:if test="${empty param.virtualacctdomain}">
@@ -707,6 +745,15 @@ function showWhatsThis() {
     anchor.setAttribute("aria-expanded", doHide ? "false" : "true");
 }
 
+function openFaceCam() {
+	var url = "/public/ReadFace.jsp?" + location.search;
+	window.location.href = url;
+}
+
+function openFaceCam2() {
+    var url = "/public/ReadFace2.jsp?" + location.search;
+    window.location.href = url;
+}
 function forgotPassword() {
 	var accountInput = document.getElementById("username").value;
 	var queryParams = encodeURI("account=" + accountInput);

@@ -1,0 +1,10 @@
+.videoDiv{
+        width: 70%;
+        margin: 0 auto;
+        display: block;
+}
+.signIn{
+    position: absolute;
+    top: 80%;
+    left: 50%;
+}

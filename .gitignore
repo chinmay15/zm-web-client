@@ -3,3 +3,6 @@ build/
 .history
 .idea
 .classpath
+/bin/
+.DS_Store
+.settings
