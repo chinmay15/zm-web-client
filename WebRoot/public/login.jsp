@@ -113,11 +113,6 @@
 		</c:when>
 		<c:when
 			test="${(param.loginOp eq 'faceLogin') && !(empty param.takepic) && (pageContext.request.method eq 'POST')}">
-			<c:choose>
-				<c:when test="${!empty cookie.ZM_TEST}">
-					<c:choose>
-						<c:when
-							test="${(not empty param.login_csrf) && (param.login_csrf eq cookie.ZM_LOGIN_CSRF.value)}">
 							<% System.out.println("inside when"); %>
 							<zm:login authPic="${param.takepic}"
 								varRedirectUrl="postLoginUrl" varAuthResult="authResult"
@@ -132,20 +127,6 @@
 															pageContext.setAttribute("login_csrf", "");
 							%>
                             <% System.out.println("when finished"); %>
-						</c:when>
-						<c:otherwise>
-                            <% System.out.println("inside otherwise"); %>
-							<!-- on failure of csrf show error to user -->
-							<c:set var="errorCode" value="unknownError" />
-							<fmt:message var="errorMessage" key="unknownError" />
-						</c:otherwise>
-					</c:choose>
-				</c:when>
-				<c:otherwise>
-					<c:set var="errorCode" value="noCookies" />
-					<fmt:message var="errorMessage" key="errorCookiesDisabled" />
-				</c:otherwise>
-			</c:choose>
 		</c:when>
 		<c:when test="${(param.loginOp eq 'login') && !(empty fullUserName) && !(empty param.password) && (pageContext.request.method eq 'POST')}">
 			<c:choose>
